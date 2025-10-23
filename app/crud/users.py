@@ -86,7 +86,7 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate) -> bool:
         set_clause = ", ".join([f"{key} = :{key}" for key in fields])
         fields["user_id"] = user_id
 
-        query = text(f"UPDATE usuario SET {set_clause} WHERE id_usuario = :user_id")
+        query = text(f"UPDATE usuarios SET {set_clause} WHERE id_usuario = :user_id")
         db.execute(query, fields)
         db.commit()
         return True
