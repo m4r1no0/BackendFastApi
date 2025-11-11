@@ -52,7 +52,7 @@ def get_user_by_email(db: Session, email: str):
     try:
         query = text("""
                      SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                     email, telefono, estado, nombre_rol
+                     email, telefono, usuarios.estado, nombre_rol
                      FROM usuarios
                      JOIN  roles ON  usuarios.id_rol = roles.id_rol
                      WHERE email = :correo
