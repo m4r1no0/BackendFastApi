@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -50,15 +50,28 @@ def get_produccion_huevos(
 @router.get("/all", response_model=List[ProduccionHuevosOut])
 def get_all_produccion_huevos(
     db: Session = Depends(get_db),
-    user_token: UserOut = Depends(get_current_user)
+    user_token: UserOut = Depends(get_current_user),
+    limit: int = Query(10, ge=1, description="Cantidad máxima de registros a devolver"),
+    offset: int = Query(0, ge=0, description="Cantidad de registros a saltar"),
+    fecha_inicio: Optional[str] = Query(None, description="Fecha inicial en formato YYYY-MM-DD"),
+    fecha_fin: Optional[str] = Query(None, description="Fecha final en formato YYYY-MM-DD")
 ):
+    """
+    Obtiene todas las producciones de huevos con JOINs a galpones y tipo_huevos,
+    soportando paginación y filtrado por rango de fechas.
+    """
     try:
+        # Verificar permisos del usuario
         id_rol = user_token.id_rol
         if not verify_permissions(db, id_rol, modulo, 'seleccionar'):
             raise HTTPException(status_code=401, detail="Usuario no autorizado")
 
-        producciones = crud_produccion.get_all_produccion_huevos(db)
+        producciones = crud_produccion.get_all_produccion_huevos(
+            db, limit=limit, offset=offset, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
+        )
+
         return producciones
+
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

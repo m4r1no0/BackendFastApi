@@ -45,9 +45,27 @@ def get_produccion_huevos_by_id(db: Session, produccion_id: int):
         logger.error(f"Error al obtener produccion_huevos por ID: {e}")
         raise Exception("Error de base de datos al obtener la producción de huevos")
 
-def get_all_produccion_huevos(db: Session):
+
+def get_all_produccion_huevos(
+    db: Session,
+    limit: int = 10,
+    offset: int = 0,
+    fecha_inicio: str = None,
+    fecha_fin: str = None
+):
+    """
+    Obtiene todas las producciones de huevos con JOINs a galpones y tipo_huevos,
+    soportando paginación y filtrado por rango de fechas.
+
+    Parámetros:
+        db: sesión activa de SQLAlchemy
+        limit: cantidad máxima de registros a devolver
+        offset: cantidad de registros a saltar
+        fecha_inicio: fecha inicial (YYYY-MM-DD) para filtrar registros
+        fecha_fin: fecha final (YYYY-MM-DD) para filtrar registros
+    """
     try:
-        query = text("""
+        base_query = """
             SELECT 
                 produccion_huevos.id_produccion,
                 galpones.nombre AS nombre_galpon,
@@ -58,15 +76,26 @@ def get_all_produccion_huevos(db: Session):
             LEFT JOIN tipo_huevos 
                 ON produccion_huevos.id_tipo_huevo = tipo_huevos.id_tipo_huevo
             LEFT JOIN galpones 
-                ON produccion_huevos.id_galpon = galpones.id_galpon;
+                ON produccion_huevos.id_galpon = galpones.id_galpon
+        """
 
-        """)
-        result = db.execute(query).mappings().all()
+        # Agregar filtro por rango de fechas si se proporcionan ambos parámetros
+        params = {"limit": limit, "offset": offset}
+        if fecha_inicio and fecha_fin:
+            base_query += " WHERE fecha BETWEEN :fecha_inicio AND :fecha_fin"
+            params["fecha_inicio"] = fecha_inicio
+            params["fecha_fin"] = fecha_fin
+
+        # Orden y paginación
+        base_query += " ORDER BY produccion_huevos.fecha ASC LIMIT :limit OFFSET :offset"
+
+        result = db.execute(text(base_query), params).mappings().all()
         return result
+
     except SQLAlchemyError as e:
         logger.error(f"Error al obtener todas las producciones de huevos: {e}")
         raise Exception("Error de base de datos al obtener las producciones de huevos")
-
+    
 def update_produccion_huevos_by_id(db: Session, produccion_id: int, produccion: ProduccionHuevosUpdate) -> Optional[bool]:
     try:
         produccion_data = produccion.model_dump(exclude_unset=True)
