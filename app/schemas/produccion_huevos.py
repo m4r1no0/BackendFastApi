@@ -19,3 +19,10 @@ class ProduccionHuevosUpdate(BaseModel):
 
 class ProduccionHuevosOut(ProduccionHuevosBase):
     id_produccion: int
+    
+class ProduccionHuevosOut(BaseModel):
+    id_produccion: int
+    nombre_galpon: str
+    cantidad: int
+    fecha: date
+    tamaño: str
