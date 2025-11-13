@@ -28,9 +28,16 @@ def create_produccion_huevos(db: Session, produccion: ProduccionHuevosCreate) ->
 def get_produccion_huevos_by_id(db: Session, produccion_id: int):
     try:
         query = text("""
-            SELECT id_produccion, id_galpon, cantidad, fecha, id_tipo_huevo
-            FROM produccion_huevos
-            WHERE id_produccion = :id_produccion
+            SELECT 
+                ph.id_produccion,
+                g.nombre AS nombre_galpon,
+                ph.cantidad,
+                ph.fecha,
+                th.tamaño
+            FROM produccion_huevos ph
+            JOIN galpones g ON ph.id_galpon = g.id_galpon
+            JOIN tipo_huevos th ON ph.id_tipo_huevo = th.id_tipo_huevo
+            WHERE ph.id_produccion = :id_produccion;
         """)
         result = db.execute(query, {"id_produccion": produccion_id}).mappings().first()
         return result
