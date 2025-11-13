@@ -41,7 +41,17 @@ def get_produccion_huevos_by_id(db: Session, produccion_id: int):
 def get_all_produccion_huevos(db: Session):
     try:
         query = text("""
-            SELECT * FROM produccion_huevos;
+            SELECT 
+                produccion_huevos.id_produccion,
+                galpones.nombre AS nombre_galpon,
+                produccion_huevos.cantidad,
+                produccion_huevos.fecha,
+                tipo_huevos.tamaño
+            FROM produccion_huevos
+            LEFT JOIN tipo_huevos 
+                ON produccion_huevos.id_tipo_huevo = tipo_huevos.id_tipo_huevo
+            LEFT JOIN galpones 
+                ON produccion_huevos.id_galpon = galpones.id_galpon;
 
         """)
         result = db.execute(query).mappings().all()
