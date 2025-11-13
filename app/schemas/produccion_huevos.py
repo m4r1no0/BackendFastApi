@@ -16,7 +16,6 @@ class ProduccionHuevosUpdate(BaseModel):
     cantidad: Optional[int] = Field(default=None, ge=0)
     fecha: Optional[date] = None
     id_tipo_huevo: Optional[int] = Field(default=None, gt=0)
-    galpon: str
 
 class ProduccionHuevosOut(ProduccionHuevosBase):
     id_produccion: int
