@@ -48,9 +48,9 @@ def get_all_produccion_huevos(db: Session):
     produccion_huevos.fecha,
     tipo_huevos.tamaño
 FROM produccion_huevos
-JOIN tipo_huevos 
+LEFT JOIN tipo_huevos 
     ON produccion_huevos.id_tipo_huevo = tipo_huevos.id_tipo_huevo
-JOIN galpones 
+LEFT JOIN galpones 
     ON produccion_huevos.id_galpon = galpones.id_galpon;
 
         """)
