@@ -14,14 +14,14 @@ def create_user(db: Session, user: UserCreate) -> Optional[bool]:
         pass_encript = get_hashed_password(user.pass_hash)
         user.pass_hash = pass_encript
         sentencia = text("""
-            INSERT INTO usuarios (
-                nombre, documento, id_rol,
-                email, pass_hash,
-                telefono, estado
+            INSERT INTO usuarios(
+                nombre, id_rol, email,
+                telefono, documento,   
+                pass_hash, estado
             ) VALUES (
-                :nombre, :documento, :id_rol,
-                :email, :pass_hash,
-                :telefono, :estado
+                :nombre, :id_rol, :email,
+                :telefono, :documento,
+                :pass_hash, :estado
             )
         """)
         db.execute(sentencia, user.model_dump())
@@ -35,10 +35,8 @@ def create_user(db: Session, user: UserCreate) -> Optional[bool]:
 def get_user_by_email_for_login(db: Session, email: str):
     try:
         query = text("""
-                     SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                     email, telefono, usuarios.estado, nombre_rol, pass_hash
-                     FROM usuarios
-                     JOIN  roles ON  usuarios.id_rol = roles.id_rol
+                     SELECT id_usuario, nombre, documento, usuarios.id_rol, email, telefono, usuarios.estado, nombre_rol, pass_hash
+                     FROM usuarios INNER JOIN roles ON usuarios.id_rol=roles.id_rol
                      WHERE email = :correo
                      """)
         result = db.execute(query, {"correo": email}).mappings().first()
@@ -51,10 +49,8 @@ def get_user_by_email_for_login(db: Session, email: str):
 def get_user_by_email(db: Session, email: str):
     try:
         query = text("""
-                     SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                     email, telefono, usuarios.estado, nombre_rol
-                     FROM usuarios
-                     JOIN  roles ON  usuarios.id_rol = roles.id_rol
+                     SELECT id_usuario, nombre, documento, usuarios.id_rol, email, telefono, usuarios.estado, nombre_rol
+                     FROM usuarios INNER JOIN roles ON usuarios.id_rol=roles.id_rol
                      WHERE email = :correo
                      """)
         result = db.execute(query, {"correo": email}).mappings().first()
@@ -66,10 +62,8 @@ def get_user_by_email(db: Session, email: str):
 def get_all_user_except_admins(db: Session):
     try:
         query = text("""
-                     SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                     email, telefono, estado, nombre_rol
-                     FROM usuarios
-                     JOIN  roles ON  usuarios.id_rol = roles.id_rol
+                    SELECT id_usuario, nombre, documento, usuarios.id_rol, email, telefono, usuarios.estado, nombre_rol
+                     FROM usuarios INNER JOIN roles ON usuarios.id_rol=roles.id_rol
                      WHERE usuarios.id_rol NOT IN (1,2)
                      """)
         result = db.execute(query).mappings().all()
@@ -126,10 +120,8 @@ def update_user_by_id(db: Session, user_id: int, user: UserUpdate) -> Optional[b
 def get_user_by_id(db: Session, id:int):
     try:
         query = text("""
-                     SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                     email, telefono, estado, nombre_rol
-                     FROM usuarios
-                     JOIN  roles ON  usuarios.id_rol = roles.id_rol
+                     SELECT id_usuario, nombre, documento, usuarios.id_rol, email, telefono, usuarios.estado, nombre_rol
+                     FROM usuarios INNER JOIN roles ON usuarios.id_rol=roles.id_rol
                      WHERE id_usuario = :id_user
                      """)
         result = db.execute(query, {"id_user": id}).mappings().first()
