@@ -52,7 +52,6 @@ def get_all_produccion_huevos(
     db: Session = Depends(get_db),
     user_token: UserOut = Depends(get_current_user),
     limit: int = Query(10, ge=1, description="Cantidad máxima de registros a devolver"),
-    offset: int = Query(0, ge=0, description="Cantidad de registros a saltar"),
     fecha_inicio: Optional[str] = Query(None, description="Fecha inicial en formato YYYY-MM-DD"),
     fecha_fin: Optional[str] = Query(None, description="Fecha final en formato YYYY-MM-DD")
 ):
@@ -67,7 +66,7 @@ def get_all_produccion_huevos(
             raise HTTPException(status_code=401, detail="Usuario no autorizado")
 
         producciones = crud_produccion.get_all_produccion_huevos(
-            db, limit=limit, offset=offset, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
+            db, limit=limit, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
         )
 
         return producciones

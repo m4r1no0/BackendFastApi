@@ -49,7 +49,6 @@ def get_produccion_huevos_by_id(db: Session, produccion_id: int):
 def get_all_produccion_huevos(
     db: Session,
     limit: int = 10,
-    offset: int = 0,
     fecha_inicio: str = None,
     fecha_fin: str = None
 ):
@@ -60,7 +59,6 @@ def get_all_produccion_huevos(
     Parámetros:
         db: sesión activa de SQLAlchemy
         limit: cantidad máxima de registros a devolver
-        offset: cantidad de registros a saltar
         fecha_inicio: fecha inicial (YYYY-MM-DD) para filtrar registros
         fecha_fin: fecha final (YYYY-MM-DD) para filtrar registros
     """
@@ -80,14 +78,14 @@ def get_all_produccion_huevos(
         """
 
         # Agregar filtro por rango de fechas si se proporcionan ambos parámetros
-        params = {"limit": limit, "offset": offset}
+        params = {"limit": limit}
         if fecha_inicio and fecha_fin:
             base_query += " WHERE fecha BETWEEN :fecha_inicio AND :fecha_fin"
             params["fecha_inicio"] = fecha_inicio
             params["fecha_fin"] = fecha_fin
 
         # Orden y paginación
-        base_query += " ORDER BY produccion_huevos.fecha ASC LIMIT :limit OFFSET :offset"
+        base_query += " ORDER BY produccion_huevos.fecha ASC LIMIT :limit"
 
         result = db.execute(text(base_query), params).mappings().all()
         return result
