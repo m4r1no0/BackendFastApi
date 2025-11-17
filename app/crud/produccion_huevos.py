@@ -115,3 +115,29 @@ def update_produccion_huevos_by_id(db: Session, produccion_id: int, produccion: 
         db.rollback()
         logger.error(f"Error al actualizar produccion_huevos {produccion_id}: {e}")
         raise Exception("Error de base de datos al actualizar la producción de huevos")
+
+def delete_produccion_huevos_by_id(db: Session, produccion_id: int) -> Optional[bool]:
+    """
+    Elimina una producción de huevos por ID
+    """
+    try:
+        sentencia = text("""
+            DELETE FROM produccion_huevos 
+            WHERE id_produccion = :id_produccion
+        """)
+        
+        result = db.execute(sentencia, {"id_produccion": produccion_id})
+        db.commit()
+        
+        # Verificar si se eliminó algún registro
+        if result.rowcount > 0:
+            logger.info(f"Producción de huevos {produccion_id} eliminada correctamente")
+            return True
+        else:
+            logger.warning(f"No se encontró la producción de huevos {produccion_id} para eliminar")
+            return False
+            
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Error al eliminar produccion_huevos {produccion_id}: {e}")
+        raise Exception("Error de base de datos al eliminar la producción de huevos")
